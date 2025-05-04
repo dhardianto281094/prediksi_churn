@@ -57,7 +57,6 @@ def show_overview():
 
             st.markdown("### 📋 Overview Dashboard")
 
-            # Layout 2 kolom untuk tampilan yang lebih rapi
             col1, col2 = st.columns(2)
 
             # 1. Distribusi Churn
@@ -97,22 +96,33 @@ def show_overview():
             ax3.set_title("Heatmap Korelasi Fitur")
             st.pyplot(fig3)
 
-            # 5. Segmentasi Berdasarkan Pendapatan
-            st.subheader("💸 Segmentasi Pelanggan Berdasarkan Pendapatan")
-            income_churn = df.groupby('IncomeCategory')['Churnlabel'].value_counts(normalize=True).unstack().fillna(0)
-            fig5, ax5 = plt.subplots(figsize=(10, 6))
-            income_churn.plot(kind='bar', stacked=True, color=["#ff4b4b", "#42b2a5"], ax=ax5)
-            ax5.set_title('Segmentasi Churn Berdasarkan Pendapatan')
-            ax5.set_xlabel('Kategori Pendapatan')
-            ax5.set_ylabel('Proporsi Churn')
-            st.pyplot(fig5)
+            # 5. Segmentasi Berdasarkan Jenis Kontrak
+            if 'Contract' in df.columns:
+                st.subheader("📄 Segmentasi Churn Berdasarkan Jenis Kontrak")
+                contract_churn = df.groupby('Contract')['Churnlabel'].value_counts(normalize=True).unstack().fillna(0)
+                fig5, ax5 = plt.subplots(figsize=(10, 6))
+                contract_churn.plot(kind='bar', stacked=True, color=["#ff4b4b", "#42b2a5"], ax=ax5)
+                ax5.set_title('Segmentasi Churn Berdasarkan Jenis Kontrak')
+                ax5.set_xlabel('Jenis Kontrak')
+                ax5.set_ylabel('Proporsi Churn')
+                st.pyplot(fig5)
+
+                # Widget untuk Filter Kontrak
+                st.markdown("### 🔎 Filter Berdasarkan Jenis Kontrak")
+                contract_filter = st.selectbox("Pilih Jenis Kontrak", df['Contract'].unique())
+                filtered_df = df[df['Contract'] == contract_filter]
+            else:
+                st.warning("Kolom 'Contract' tidak ditemukan dalam dataset.")
 
             # 6. Distribusi Churn Berdasarkan Lama Berlangganan
             st.subheader("📅 Distribusi Churn Berdasarkan Lama Berlangganan")
-            fig4, ax4 = plt.subplots(figsize=(8, 6))
-            sns.boxplot(data=df, x='Churnlabel', y='MonthsOnBook', ax=ax4, palette="coolwarm")
-            ax4.set_title("Perbandingan Lama Berlangganan dengan Churn")
-            st.pyplot(fig4)
+            if 'Tenure' in df.columns:
+                fig4, ax4 = plt.subplots(figsize=(8, 6))
+                sns.boxplot(data=df, x='Churnlabel', y='Tenure', ax=ax4, palette="coolwarm")
+                ax4.set_title("Perbandingan Lama Berlangganan (Tenure) dengan Churn")
+                st.pyplot(fig4)
+            else:
+                st.warning("Kolom 'Tenure' tidak ditemukan dalam dataset.")
 
             # 7. Churn Berdasarkan Tipe Internet
             st.subheader("🍰 Churn Berdasarkan Tipe Internet")
@@ -127,10 +137,6 @@ def show_overview():
             ax6.set_title('Distribusi Churn Berdasarkan Tipe Internet')
             st.pyplot(fig6)
 
-            # Widget untuk Filter
-            st.markdown("### Filter Berdasarkan Kategori Pendapatan")
-            income_filter = st.selectbox("Pilih Kategori Pendapatan", df['IncomeCategory'].unique())
-            filtered_df = df[df['IncomeCategory'] == income_filter]
         except FileNotFoundError:
             st.error("❌ File CSV tidak ditemukan.")
         except Exception as e:
