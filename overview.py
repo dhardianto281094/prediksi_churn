@@ -131,10 +131,6 @@ def show_overview():
             st.markdown("### Filter Berdasarkan Kategori Pendapatan")
             income_filter = st.selectbox("Pilih Kategori Pendapatan", df['IncomeCategory'].unique())
             filtered_df = df[df['IncomeCategory'] == income_filter]
-
-            st.write(f"Menampilkan data untuk kategori pendapatan: {income_filter}")
-            st.write(filtered_df.head())
-
         except FileNotFoundError:
             st.error("❌ File CSV tidak ditemukan.")
         except Exception as e:
